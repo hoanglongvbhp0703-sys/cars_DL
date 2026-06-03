@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vehicle Detection System</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <span class="brand-icon">&#x1F697;</span>
+      <span class="brand-name">VehicleDetect<span class="brand-accent">AI</span></span>
+    </div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="detect">Detect</button>
+      <button class="nav-tab" data-tab="results">Results</button>
+      <button class="nav-tab" data-tab="kaggle">Kaggle Datasets</button>
+      <button class="nav-tab" data-tab="api">API Docs</button>
+    </div>
+    <div class="navbar-status">
+      <span class="status-dot" id="apiStatus"></span>
+      <span id="apiStatusText">Checking...</span>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- ===== TAB: DETECT ===== -->
+    <section class="tab-panel active" id="tab-detect">
+      <div class="page-header">
+        <h1>Vehicle Detection</h1>
+        <p>Upload a road or traffic video — AI will detect and annotate all vehicles in real-time.</p>
+      </div>
+
+      <!-- Upload zone -->
+      <div class="card upload-card" id="uploadZone">
+        <div class="upload-icon">&#x1F4F9;</div>
+        <div class="upload-title">Drop video here or click to browse</div>
+        <div class="upload-sub">MP4 · AVI · MOV · MKV · WEBM &nbsp;|&nbsp; Max 500 MB</div>
+        <input type="file" id="fileInput" accept=".mp4,.avi,.mov,.mkv,.webm" hidden />
+        <button class="btn btn-primary" id="browseBtn">Choose File</button>
+      </div>
+
+      <!-- Selected file info -->
+      <div class="card file-info hidden" id="fileInfo">
+        <div class="file-info-row">
+          <span class="file-name" id="fileName"></span>
+          <span class="file-size" id="fileSize"></span>
+          <button class="btn btn-danger btn-sm" id="clearFileBtn">Remove</button>
+        </div>
+        <button class="btn btn-primary btn-lg" id="startBtn">Start Detection</button>
+      </div>
+
+      <!-- Progress panel -->
+      <div class="card progress-card hidden" id="progressPanel">
+        <div class="progress-header">
+          <span id="progressLabel">Processing...</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-stats">
+          <div class="stat"><span class="stat-label">Frame</span><span class="stat-val" id="frameCount">0 / 0</span></div>
+          <div class="stat"><span class="stat-label">Elapsed</span><span class="stat-val" id="elapsedTime">0s</span></div>
+          <div class="stat"><span class="stat-label">ETA</span><span class="stat-val" id="etaTime">—</span></div>
+          <div class="stat"><span class="stat-label">Status</span><span class="stat-val" id="jobStatusBadge"><span class="badge badge-processing">processing</span></span></div>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div class="card result-card hidden" id="resultPanel">
+        <div class="result-header">
+          <h2>Detection Complete</h2>
+          <div class="result-actions">
+            <button class="btn btn-primary" id="downloadBtn">Download Processed Video</button>
+            <button class="btn btn-secondary" id="newJobBtn">Process Another Video</button>
+          </div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Vehicle breakdown chart -->
+        <div class="breakdown-section">
+          <h3>Vehicle Breakdown</h3>
+          <div class="breakdown-bars" id="breakdownBars"></div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="meta-grid" id="metaGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: RESULTS ===== -->
+    <section class="tab-panel" id="tab-results">
+      <div class="page-header">
+        <h1>Processing History</h1>
+        <button class="btn btn-secondary" id="refreshJobsBtn">Refresh</button>
+      </div>
+      <div id="jobsList" class="jobs-list">
+        <div class="empty-state">No jobs yet. Upload a video to get started.</div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: KAGGLE ===== -->
+    <section class="tab-panel" id="tab-kaggle">
+      <div class="page-header">
+        <h1>Kaggle Datasets</h1>
+        <p>Search and download vehicle / road datasets directly from Kaggle.</p>
+      </div>
+      <div class="search-bar">
+        <input type="text" id="kaggleQuery" placeholder="e.g. vehicle detection, traffic camera..." class="search-input" />
+        <button class="btn btn-primary" id="kaggleSearchBtn">Search</button>
+      </div>
+      <div id="kaggleResults" class="kaggle-results">
+        <div class="empty-state">Enter a keyword to search Kaggle datasets.</div>
+      </div>
+
+      <div class="page-header" style="margin-top:2rem">
+        <h2>Downloaded Datasets</h2>
+        <button class="btn btn-secondary" id="refreshLocalBtn">Refresh</button>
+      </div>
+      <div id="localDatasets" class="kaggle-results">
+        <div class="empty-state">No datasets downloaded yet.</div>
+      </div>
+    </section>
+
+    <!-- ===== TAB: API ===== -->
+    <section class="tab-panel" id="tab-api">
+      <div class="page-header">
+        <h1>API Reference</h1>
+        <p>Interactive docs are available at <a href="/docs" target="_blank">/docs</a> (Swagger UI) and <a href="/redoc" target="_blank">/redoc</a>.</p>
+      </div>
+      <div class="api-table-wrapper">
+        <table class="api-table">
+          <thead>
+            <tr><th>Method</th><th>Endpoint</th><th>Description</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/health</td><td>Health check, model status</td></tr>
+            <tr><td><span class="method post">POST</span></td><td>/api/v1/videos/upload</td><td>Upload video, returns job_id</td></tr>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/videos/{job_id}/status</td><td>Poll job status & summary</td></tr>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/videos/{job_id}/download</td><td>Download processed video</td></tr>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/videos/</td><td>List all jobs</td></tr>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/datasets/search?q=...</td><td>Search Kaggle datasets</td></tr>
+            <tr><td><span class="method post">POST</span></td><td>/api/v1/datasets/download?ref=...</td><td>Download a Kaggle dataset</td></tr>
+            <tr><td><span class="method get">GET</span></td><td>/api/v1/datasets/local</td><td>List downloaded datasets</td></tr>
+            <tr><td><span class="method ws">WS</span></td><td>/api/v1/videos/ws/{job_id}</td><td>Live progress stream</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast notification -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/upload.js"></script>
+  <script src="/static/js/detection.js"></script>
+</body>
+</html>
