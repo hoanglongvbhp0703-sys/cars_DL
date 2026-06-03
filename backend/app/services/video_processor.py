@@ -85,7 +85,9 @@ async def process_video_job(
         meta = _probe_video(input_path)
         _jobs[job_id].video_metadata = meta
 
-        pipeline = DetectionPipeline(settings.model_path, settings.DETECTION_CONFIDENCE)
+        from .detection_pipeline import resolve_model_path
+        model_path, _ = resolve_model_path(settings.MODELS_DIR)
+        pipeline = DetectionPipeline(model_path, settings.DETECTION_CONFIDENCE)
 
         output_path = settings.PROCESSED_DIR / f"{job_id}_processed.mp4"
         fourcc = cv2.VideoWriter_fourcc(*"mp4v")
