@@ -22,3 +22,15 @@ data/models/*.tflite
 node_modules/
 .DS_Store
 Thumbs.db
+
+# Local Claude context (not for repo)
+CLAUDE.md
+
+# Training artifacts
+training/runs/
+data/dataset_merged/
+data/models/*.pt
+data/models/*.tflite
+
+# Kaggle credentials
+.kaggle/
