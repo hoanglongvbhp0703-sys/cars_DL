@@ -12,6 +12,8 @@ build/
 htmlcov/
 logs/
 data/uploads/*
+!data/uploads/datasets/
+data/uploads/datasets/**/*.zip
 data/processed/*
 data/models/*.tflite
 !data/uploads/.gitkeep
